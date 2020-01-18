@@ -6,8 +6,8 @@ const URL = 'ws://localhost:3030'
 
 class Chat extends Component {
   state = {
-    name: 'Bob',
-    messages: [],
+    name: 'Editor',
+    documentStruct: null
   }
 
   ws = new WebSocket(URL)
@@ -20,8 +20,8 @@ class Chat extends Component {
 
     this.ws.onmessage = evt => {
       // on receiving a message, add it to the list of messages
-      const message = JSON.parse(evt.data)
-      this.addMessage(message)
+      const dataStruct = JSON.parse(evt.data)
+      this.setState(state => ({documentStruct: dataStruct}))
     }
 
     this.ws.onclose = () => {
@@ -32,41 +32,66 @@ class Chat extends Component {
       })
     }
   }
-
-  addMessage = message =>
-    this.setState(state => ({ messages: [message, ...state.messages] }))
+ 
+  editLineNumer = (lineNum, value) => {
+    // change the local document
+  }
+  
+  submitChange =( lineNumber, newValue) => {
+    this.ws.send(JSON.stringify({
+        current_document_version: this.state.documentStruct.version,
+        name: this.state.name,
+        line_number: lineNumber,
+        new_value: newValue
+    })) 
+  }
 
   submitMessage = messageString => {
     // on submitting the ChatInput form, send the message, add it to the list and reset the input
     const message = { name: this.state.name, message: messageString }
     this.ws.send(JSON.stringify(message))
     this.addMessage(message)
+  
+  }
+
+  hasDocumentStruc = () => {
+    return this.state.documentStruct != null;
   }
 
   render() {
     return (
       <div>
         <label htmlFor="name">
-          Name:&nbsp;
+          Editor Name:&nbsp;
           <input
             type="text"
             id={'name'}
             placeholder={'Enter your name...'}
             value={this.state.name}
-            onChange={e => this.setState({ name: e.target.value })}
+           onChange={e => this.setState({ name: e.target.value })}
           />
         </label>
         <ChatInput
           ws={this.ws}
-          onSubmitMessage={messageString => this.submitMessage(messageString)}
+          //onSubmitMessage={messageString => this.submitMessage(messageString)}
         />
-        {this.state.messages.map((message, index) =>
-          <ChatMessage
+        
+        { this.hasDocumentStruc() ? this.state.documentStruct.document.map((value, index) =>
+           <ChatMessage
             key={index}
-            message={message.message}
-            name={message.name}
-          />,
-        )}
+            lineNumber={index}
+            value={value}
+            editor={this.state.name}
+            onChangeFunc={e => { 
+              console.log(index);
+              console.log(e.target.value);
+              this.submitChange(index, e.target.value);
+              }
+            }
+          />
+        )
+        :  <strong> No Document Loaded</strong> 
+        }
       </div>
     )
   }

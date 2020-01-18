@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 class ChatInput extends Component {
   static propTypes = {
-    onSubmitMessage: PropTypes.func.isRequired,
+    //onSubmitMessage: PropTypes.func.isRequired,
   }
   state = {
     message: '',
@@ -15,15 +15,15 @@ class ChatInput extends Component {
         action="."
         onSubmit={e => {
           e.preventDefault()
-          this.props.onSubmitMessage(this.state.message)
-          this.setState({ message: '' })
+          //this.props.onSubmitMessage(this.state.message)
+          //this.setState({ message: '' })
         }}
       >
         <input
           type="text"
           placeholder={'Enter message...'}
-          value={this.state.message}
-          onChange={e => this.setState({ message: e.target.value })}
+          //value={this.state.message}
+          //onChange={e => this.setState({ message: e.target.value })}
         />
         <input type="submit" value={'Send'} />
       </form>
